@@ -1,0 +1,267 @@
+<!doctype html>
+<html>
+   <head>
+      <title>Snake Game v 0.2</title>
+      <style>
+	      body {
+	        font-family: Courier New, monospace;
+	      }
+         .wrap {
+            width: 400px;
+            height: 500px;
+            background-color: #ddd;
+            padding: 20px 0 0 30px;
+            box-sizing: border-box;
+            float: left;
+         }
+         .field {
+            width: 200px;
+            height: 375px; 
+            border: 1px dashed red;
+            float: left;
+         }
+         .point {
+            float: left;
+            margin-top: 50px;
+            margin-left: 20px;
+            font-size: 24px;
+            font-family: Arial;
+         }
+         .inputs {
+            float: left;
+            margin: 50px 0 0 40px;
+         }
+         .instruction{
+            width: 330px;
+            background-color: #eee;
+            margin-top: 10px;
+            padding: 10px 5px;
+            box-sizing: border-box;
+            text-align: center;
+         }
+      </style>
+   </head>
+   <body>
+      <!--Created By Imran Mlloja 
+         Date: 25.04.2017
+         Snake Game(Bug Fixed - Date: 14.03.2018,15.03.2018)-->
+      <div class="wrap">
+         <div class="field" id="field">
+         </div>
+         <p class="point">Points:<span id="value">0</span></p>
+      </div>
+      <div class="inputs">
+         <input type="text" id="headMovements" onkeyup="takeInput(this.value)">
+         <div class="instruction">
+            <span class="wlc">Welcome To Snake Game Version 0.2</span><br><br><br>
+            To play the game you should enter the command to the text input above<br><br>
+            W --> is for moving Up<br>
+            S --> is for moving Down<br>
+            A --> is for moving Left<br>
+            D --> is for moving Right	
+         </div>
+      </div>
+      <script>
+         var field = document.getElementById('field');
+         var spans = '';
+
+         var gameOver  = false;
+         var points    = 0;
+         var snakeBody = [[5,0],[5,1],[5,2],[5,3]];	
+         var direction = "right"; 
+         
+         var fruitCoordinate = fruitPosition();
+         var fruitEatenEvent = false;
+         var fruitsEatenCoordinate = [];
+         
+         
+         document.getElementById("headMovements").value = "";
+         
+
+         ///////////////////////////////////////////////////
+         ///////////
+         ///////////    F U N C T I O N S
+         ///////////////////////////////////////////////////
+         function drawSnakeGame(x,y,spanId){
+         
+         	var headIndex = snakeBody.length - 1;
+           
+            var drawCharacter;
+         	yHeadCoordinate = snakeBody[headIndex][0];
+         	xHeadCoordinate = snakeBody[headIndex][1];
+            
+            drawCharacter = "&nbsp;";//FIELD EMPTY_DRAW PROCESS 
+         	
+            if(!fruitEatenEvent){   
+               if(fruitCoordinate[1] == x && fruitCoordinate[0] == y) {drawCharacter = "F";}//FRUIT DRAW PROCESS
+               controlForFruitEatEvent(xHeadCoordinate, yHeadCoordinate);
+            }
+
+            
+         	for(bodyIndex = 0; bodyIndex < snakeBody.length; bodyIndex++){
+
+         		if(snakeBody[bodyIndex][1] == x && snakeBody[bodyIndex][0] == y){
+                  if(bodyIndex == snakeBody.length - 1) {drawCharacter = "0";}//HEAD DRAW PROCESS
+         			else {drawCharacter = "o";}//BODY DRAW PROCESS
+               }
+         	}
+         	
+            spans += "<span id='s_" + spanId + "'>" + drawCharacter + "</span>";
+         }
+
+         function controlForFruitEatEvent(xHeadCoordinate, yHeadCoordinate) {
+
+            if(xHeadCoordinate == fruitCoordinate[1] && yHeadCoordinate == fruitCoordinate[0]) {
+
+               fruitEatenEvent = true;
+               fruitsEatenCoordinate.push(fruitCoordinate);
+               
+               points++;
+               document.getElementById("value").innerHTML = points;
+            }
+         }
+
+         function fruitPosition(){
+         
+            do{
+               found = true;
+               x = Math.floor((Math.random() * 19));
+               y = Math.floor((Math.random() * 20));
+               for(i=0; i<snakeBody.length; i++){
+                  if(x == snakeBody[i][1] && y == snakeBody[i][0]){found = false; break;}                  
+               }
+            }while(!found);
+            return [y, x];
+         }
+         
+         function headMovement(i){
+         
+         	switch(direction){
+         		case "right" :
+         			if(snakeBody[i][1] == 19)
+         				snakeBody[i][1] = 0;
+         			else
+         				snakeBody[i][1] += 1;
+         			break;
+         		case "left" :
+         			if(snakeBody[i][1] == 0)
+         				snakeBody[i][1] = 19;
+         			else
+         				snakeBody[i][1] -= 1;
+         			break;	
+         		case "up" :
+         			if(snakeBody[i][0] == 0)
+         				snakeBody[i][0] = 20;	
+         			else
+         				snakeBody[i][0] -= 1;
+         			break;
+         		case "down" :
+         			if(snakeBody[i][0] == 20)
+         				snakeBody[i][0] = 0;	
+         			else
+         				snakeBody[i][0] += 1;
+         			break;						
+         	}
+         }
+         
+         function takeInput(input){
+         	command = input.substr(input.length - 1);
+         	switch(command) {
+         	
+         		case "w":
+         			if(direction != "down"){
+         				direction = "up";
+                  }
+         			break;
+         		case "d":
+         			if(direction != "left"){
+         				direction = "right";
+                  }
+         			break;
+         		case "a":
+         			if(direction != "right"){
+         				direction = "left";
+                  }
+         			break;
+         		case "s":
+         			if(direction != "up"){
+         				direction = "down";
+                  }
+         			break;
+         	}	
+         }
+         
+         
+         function CheckIfGameOver(){
+
+         	for(i = 0; i < snakeBody.length - 1; i++){	
+         		if(xHeadCoordinate == snakeBody[i][1] && yHeadCoordinate == snakeBody[i][0]){
+         			alert("Game Over!\n\nYou Achived " + points + " points.\n");
+         			gameOver = true;
+         			return;
+         		}
+         	}
+         }
+         
+         function updateSnake() {
+            
+            head = snakeBody.length - 1;
+            y = snakeBody[head][0];
+            x = snakeBody[head][1];
+            headMovement(head);
+
+         	for(i = snakeBody.length - 2; i >= 0; i--){		
+                y2 = snakeBody[i][0];
+         		x2 = snakeBody[i][1];	
+         		
+                snakeBody[i][0] = y;
+         		snakeBody[i][1] = x;
+         		
+                x = x2;
+         		y = y2;		
+         	}
+            if(fruitsEatenCoordinate.length > 0) {snakeTailExtention();}
+         }
+
+         function snakeTailExtention() {
+          
+            lastCellTailY = snakeBody[0][0];
+            lastCellTailX = snakeBody[0][1];
+
+            for(i = 0; i < fruitsEatenCoordinate.length; i++){
+
+               fruitEatenY = fruitsEatenCoordinate[i][0];
+               fruitEatenX = fruitsEatenCoordinate[i][1];
+
+               if(fruitEatenY == lastCellTailY && fruitEatenX == lastCellTailX) {
+                     
+                  tailToAdd = [fruitEatenY,fruitEatenX];
+                  fruitsEatenCoordinate.splice(i,1);
+                  snakeBody.splice(0,0,tailToAdd);
+               }
+            }   
+         }
+         
+         setInterval(function(){
+         	
+         	spans = '';
+         	var spanId = 0;
+         	if(gameOver) return;
+            if(fruitEatenEvent){fruitCoordinate = fruitPosition();fruitEatenEvent = false;}
+
+            updateSnake();
+         	for(i = 0; i < 21; i++){
+         		for(j = 0; j < 20; j++){
+                  
+         			drawSnakeGame(j,i,spanId);	
+         			spanId++;
+         		}
+         		spans += "<br>";
+         	}
+         
+         	field.innerHTML = spans;		
+         	CheckIfGameOver();				
+         }, 125);
+      </script>
+   </body>
+</html>
